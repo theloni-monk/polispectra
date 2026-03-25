@@ -1,4 +1,11 @@
 import { getPhilosophies, getSpectrum, SCALES } from '../utils.js';
+import {
+    calculateDominance,
+    buildPreferenceMatrix,
+    initializeGraphLayout,
+    simulateLayout,
+    getScaleCategoryColor
+} from '../visualization-utils.js';
 
 export async function renderVisualizationPage(
     container: HTMLElement,
@@ -37,14 +44,27 @@ export async function renderVisualizationPage(
 
     // Create heatmap
     const spectrumData = await getSpectrum();
+
+    // Calculate statistics
+    const scaleIds = SCALES.map((s) => s.id);
+    const dominance = calculateDominance(spectrumData, scaleIds);
+
     const heatmapContainer = document.createElement('div');
     heatmapContainer.className = 'heatmap-container';
 
     const heatmap = document.createElement('div');
     heatmap.className = 'heatmap';
 
-    // Show top comparisons (sample)
-    const entries = Object.entries(spectrumData).slice(0, 8);
+    // Show top comparisons by dominance difference
+    const entries = Object.entries(spectrumData)
+        .sort(([keyA], [keyB]) => {
+            const [aId1, aId2] = keyA.replace('_vs_', '|').split('|');
+            const [bId1, bId2] = keyB.replace('_vs_', '|').split('|');
+            const aDiff = Math.abs((dominance[aId1] || 0) - (dominance[aId2] || 0));
+            const bDiff = Math.abs((dominance[bId1] || 0) - (dominance[bId2] || 0));
+            return bDiff - aDiff;
+        })
+        .slice(0, 12);
 
     entries.forEach(([key, data]: [string, any]) => {
         const row = document.createElement('div');
@@ -69,13 +89,13 @@ export async function renderVisualizationPage(
 
         const cellA = document.createElement('div');
         cellA.className = 'heatmap-cell';
-        cellA.style.background = getHeatmapColor(percentA);
+        cellA.style.background = getHeatmapColorGradient(percentA / 100);
         cellA.textContent = `${Math.round(percentA)}%`;
         cellA.title = `Chose "${scaleA.name}": ${data.A} users`;
 
         const cellB = document.createElement('div');
         cellB.className = 'heatmap-cell';
-        cellB.style.background = getHeatmapColor(100 - percentA);
+        cellB.style.background = getHeatmapColorGradient((100 - percentA) / 100);
         cellB.textContent = `${Math.round(100 - percentA)}%`;
         cellB.title = `Chose "${scaleB.name}": ${data.B} users`;
 
@@ -89,6 +109,62 @@ export async function renderVisualizationPage(
 
     heatmapContainer.appendChild(heatmap);
     spectrumCard.appendChild(heatmapContainer);
+
+    // Add dominance rankings
+    const rankingsDiv = document.createElement('div');
+    rankingsDiv.style.marginTop = '2rem';
+    rankingsDiv.style.padding = '1rem';
+    rankingsDiv.style.background = 'var(--background)';
+    rankingsDiv.style.borderRadius = '8px';
+
+    const rankingsTitle = document.createElement('h3');
+    rankingsTitle.style.marginBottom = '1rem';
+    rankingsTitle.textContent = 'Most Dominant Scales';
+    rankingsDiv.appendChild(rankingsTitle);
+
+    const sorted = Object.entries(dominance)
+        .sort(([, a], [, b]) => b - a)
+        .slice(0, 5);
+
+    sorted.forEach(([scaleId, dom]) => {
+        const scale = SCALES.find((s) => s.id === scaleId);
+        if (!scale) return;
+
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.marginBottom = '0.5rem';
+
+        const bar = document.createElement('div');
+        bar.style.width = '100%';
+        bar.style.height = '24px';
+        bar.style.background = `linear-gradient(90deg, ${getScaleCategoryColor(scale.category)}, ${getScaleCategoryColor(scale.category)}88)`;
+        bar.style.borderRadius = '4px';
+        bar.style.marginRight = '1rem';
+        bar.style.position = 'relative';
+
+        const barFill = document.createElement('div');
+        barFill.style.width = dom * 100 + '%';
+        barFill.style.height = '100%';
+        barFill.style.background = getScaleCategoryColor(scale.category);
+        barFill.style.borderRadius = '4px';
+        barFill.style.transition = 'width 0.3s ease';
+
+        bar.appendChild(barFill);
+
+        const label = document.createElement('span');
+        label.style.fontSize = '0.9rem';
+        label.style.color = 'var(--text-dark)';
+        label.style.fontWeight = '600';
+        label.style.whiteSpace = 'nowrap';
+        label.textContent = `${scale.name}: ${Math.round(dom * 100)}%`;
+
+        item.appendChild(bar);
+        item.appendChild(label);
+        rankingsDiv.appendChild(item);
+    });
+
+    spectrumCard.appendChild(rankingsDiv);
     vizContainer.appendChild(spectrumCard);
 
     // Right: Philosophies list
@@ -158,9 +234,10 @@ export async function renderVisualizationPage(
     container.appendChild(page);
 }
 
-function getHeatmapColor(percentage: number): string {
-    if (percentage < 25) return '#ecf0f1';
-    if (percentage < 50) return '#ffeaa7';
-    if (percentage < 75) return '#ffb366';
-    return '#ff7675';
+function getHeatmapColorGradient(value: number): string {
+    // value: 0 = blue (cold), 0.5 = yellow (warm), 1 = red (hot)
+    if (value < 0.3) return '#3498db'; // Blue
+    if (value < 0.5) return '#2ecc71'; // Green
+    if (value < 0.7) return '#f39c12'; // Orange
+    return '#e74c3c'; // Red
 }
