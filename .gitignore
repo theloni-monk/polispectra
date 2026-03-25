@@ -1,0 +1,10 @@
+node_modules/
+*.js
+*.js.map
+*.d.ts
+.DS_Store
+.env
+.env.local
+dist/
+build/
+.vercel/
