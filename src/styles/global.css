@@ -1,18 +1,17 @@
 :root {
-    --primary: #2c3e50;
-    --secondary: #3498db;
-    --accent: #e74c3c;
-    --success: #27ae60;
-    --background: #ecf0f1;
+    --primary: #3d5a80;
+    --secondary: #5b7fa6;
+    --accent: #7d9fc1;
+    --background: #f5f7f9;
     --surface: #ffffff;
     --text-dark: #2c3e50;
-    --text-light: #7f8c8d;
-    --border: #bdc3c7;
+    --text-light: #6b7c8f;
+    --border: #d4dce6;
 
-    --self: #e74c3c;
-    --relatives: #f39c12;
-    --others: #3498db;
-    --systems: #9b59b6;
+    --self: #5b7fa6;
+    --relatives: #7d9fc1;
+    --others: #a0b9d4;
+    --systems: #6b8ba3;
 }
 
 * {
@@ -27,7 +26,7 @@ html, body {
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #f5f7f9 0%, #e8ecf1 100%);
     color: var(--text-dark);
     line-height: 1.6;
     min-height: 100vh;
@@ -66,9 +65,9 @@ button {
 }
 
 button:hover {
-    background: #2980b9;
+    background: var(--primary);
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+    box-shadow: 0 4px 12px rgba(91, 127, 166, 0.3);
 }
 
 button:active {
@@ -93,7 +92,7 @@ input, textarea {
 input:focus, textarea:focus {
     outline: none;
     border-color: var(--secondary);
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    box-shadow: 0 0 0 3px rgba(91, 127, 166, 0.15);
 }
 
 .progress-bar {

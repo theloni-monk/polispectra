@@ -223,7 +223,7 @@ export async function renderVisualizationPage(
 
     const newBtn = document.createElement('button');
     newBtn.textContent = 'Submit Another Philosophy';
-    newBtn.style.background = 'var(--success)';
+    newBtn.style.background = 'var(--accent)';
     newBtn.addEventListener('click', onReset);
 
     controls.appendChild(editBtn);
@@ -235,9 +235,9 @@ export async function renderVisualizationPage(
 }
 
 function getHeatmapColorGradient(value: number): string {
-    // value: 0 = blue (cold), 0.5 = yellow (warm), 1 = red (hot)
-    if (value < 0.3) return '#3498db'; // Blue
-    if (value < 0.5) return '#2ecc71'; // Green
-    if (value < 0.7) return '#f39c12'; // Orange
-    return '#e74c3c'; // Red
+    // value: 0 = light (low preference), 1 = dark (high preference) - neutral palette
+    if (value < 0.3) return '#d4dce6'; // Light
+    if (value < 0.5) return '#a0b9d4'; // Light-mid
+    if (value < 0.7) return '#7d9fc1'; // Mid
+    return '#5b7fa6'; // Dark
 }

@@ -16,10 +16,13 @@ export function renderSpectralPage(
     const page = document.createElement('div');
     page.className = 'spectral-page fade-in';
 
-    const questions = generateQuestions();
+    const allQuestions = generateQuestions();
+    // Start with a smaller hierarchical set (first ~20 questions instead of all pairs)
+    const visibleQuestions = allQuestions.slice(0, Math.min(20, allQuestions.length));
     const draft = loadDraft() || { initialAnswer: 'yes', answers: {}, philosophyTitle: '' };
 
     let currentQuestionIndex = 0;
+    let showingMore = false;
 
     // Header
     const header = document.createElement('div');
@@ -44,20 +47,41 @@ export function renderSpectralPage(
     const leftSidebar = document.createElement('div');
     leftSidebar.className = 'sidebar-questions';
 
-    questions.forEach((q, idx) => {
-        const link = document.createElement('div');
-        link.className = 'question-link';
-        if (idx === currentQuestionIndex) link.classList.add('active');
-        if (draft.answers[q.id]) link.classList.add('answered');
+    function updateQuestionLinks(): void {
+        leftSidebar.innerHTML = '';
+        const display = showingMore ? allQuestions : visibleQuestions;
+        display.forEach((q, idx) => {
+            const link = document.createElement('div');
+            link.className = 'question-link';
+            if (idx === currentQuestionIndex) link.classList.add('active');
+            if (draft.answers[q.id]) link.classList.add('answered');
 
-        link.textContent = `${q.scaleA.name} vs ${q.scaleB.name}`;
-        link.addEventListener('click', () => {
-            currentQuestionIndex = idx;
-            renderQuestion();
+            link.textContent = `${q.scaleA.name.split(' ')[0]} vs ${q.scaleB.name.split(' ')[0]}`;
+            link.title = `${q.scaleA.name} vs ${q.scaleB.name}`;
+            link.addEventListener('click', () => {
+                currentQuestionIndex = idx;
+                renderQuestion();
+            });
+
+            leftSidebar.appendChild(link);
         });
 
-        leftSidebar.appendChild(link);
-    });
+        if (!showingMore && allQuestions.length > visibleQuestions.length) {
+            const moreBtn = document.createElement('button');
+            moreBtn.className = 'show-more-btn';
+            moreBtn.style.width = '100%';
+            moreBtn.style.marginTop = '1rem';
+            moreBtn.textContent = `Show ${allQuestions.length - visibleQuestions.length} more questions`;
+            moreBtn.addEventListener('click', () => {
+                showingMore = true;
+                updateQuestionLinks();
+                renderQuestion();
+            });
+            leftSidebar.appendChild(moreBtn);
+        }
+    }
+
+    updateQuestionLinks();
 
     // Center - current question
     const centerContent = document.createElement('div');
@@ -70,7 +94,11 @@ export function renderSpectralPage(
     function renderQuestion(): void {
         centerContent.innerHTML = '';
 
-        const question = questions[currentQuestionIndex];
+        const display = showingMore ? allQuestions : visibleQuestions;
+        const question = display[currentQuestionIndex];
+
+        if (!question) return;
+
         const answer = draft.answers[question.id];
 
         const questionTitle = document.createElement('h2');
@@ -190,13 +218,15 @@ export function renderSpectralPage(
 
     function updateProgressInfo(): void {
         const answeredCount = Object.keys(draft.answers).length;
-        progressInfo.innerHTML = `Progress: <span class="required">${answeredCount}</span>/${questions.length} comparisons answered (need at least 3)`;
+        const display = showingMore ? allQuestions : visibleQuestions;
+        progressInfo.innerHTML = `Progress: <span class="required">${answeredCount}</span>/${display.length} answered (need at least 3 to submit)`;
     }
 
-    function updateQuestionLinks(): void {
+    function updateQuestionLinksold(): void {
+        const display = showingMore ? allQuestions : visibleQuestions;
         leftSidebar.querySelectorAll('.question-link').forEach((link, idx) => {
             link.classList.toggle('active', idx === currentQuestionIndex);
-            link.classList.toggle('answered', !!draft.answers[questions[idx].id]);
+            link.classList.toggle('answered', !!draft.answers[display[idx]?.id]);
         });
     }
 
@@ -222,7 +252,8 @@ export function renderSpectralPage(
     const nextBtn = document.createElement('button');
     nextBtn.textContent = 'Next →';
     nextBtn.addEventListener('click', () => {
-        if (currentQuestionIndex < questions.length - 1) {
+        const display = showingMore ? allQuestions : visibleQuestions;
+        if (currentQuestionIndex < display.length - 1) {
             currentQuestionIndex++;
             renderQuestion();
             updateQuestionLinks();
@@ -231,7 +262,7 @@ export function renderSpectralPage(
 
     const submitBtn = document.createElement('button');
     submitBtn.textContent = 'Submit & View Spectrum';
-    submitBtn.style.background = 'var(--success)';
+    submitBtn.style.background = 'var(--secondary)';
     submitBtn.addEventListener('click', async () => {
         const answeredCount = Object.keys(draft.answers).length;
         if (answeredCount < 3) {

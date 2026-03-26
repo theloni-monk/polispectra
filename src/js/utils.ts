@@ -56,13 +56,13 @@ export const SCALES: Scale[] = [
 
 // Generate pairwise comparison questions
 export function generateQuestions(): Array<{ id: string; scaleA: Scale; scaleB: Scale }> {
-    const questions: Array<{ id: string; scaleA: Scale; scaleB: Scale }> = [];
+    const allQuestions: Array<{ id: string; scaleA: Scale; scaleB: Scale }> = [];
 
     for (let i = 0; i < SCALES.length; i++) {
         for (let j = i + 1; j < SCALES.length; j++) {
             const scaleA = SCALES[i];
             const scaleB = SCALES[j];
-            questions.push({
+            allQuestions.push({
                 id: `${scaleA.id}_vs_${scaleB.id}`,
                 scaleA,
                 scaleB
@@ -70,7 +70,46 @@ export function generateQuestions(): Array<{ id: string; scaleA: Scale; scaleB: 
         }
     }
 
-    return questions;
+    return shuffleQuestions(allQuestions);
+}
+
+// Shuffle questions intelligently to avoid consecutive pairs comparing the same scales
+function shuffleQuestions(questions: Array<{ id: string; scaleA: Scale; scaleB: Scale }>): Array<{ id: string; scaleA: Scale; scaleB: Scale }> {
+    const shuffled: Array<{ id: string; scaleA: Scale; scaleB: Scale }> = [];
+    const remaining = [...questions];
+
+    while (remaining.length > 0) {
+        if (shuffled.length === 0) {
+            // Pick a random first question
+            const idx = Math.floor(Math.random() * remaining.length);
+            shuffled.push(remaining[idx]);
+            remaining.splice(idx, 1);
+        } else {
+            // Find a question that doesn't share scales with the last question
+            const lastQ = shuffled[shuffled.length - 1];
+            const lastScales = new Set([lastQ.scaleA.id, lastQ.scaleB.id]);
+
+            let foundIdx = -1;
+            for (let i = 0; i < remaining.length; i++) {
+                const q = remaining[i];
+                const sharesScale = lastScales.has(q.scaleA.id) || lastScales.has(q.scaleB.id);
+                if (!sharesScale) {
+                    foundIdx = i;
+                    break;
+                }
+            }
+
+            // If no non-overlapping question found, pick a random one
+            if (foundIdx === -1) {
+                foundIdx = Math.floor(Math.random() * remaining.length);
+            }
+
+            shuffled.push(remaining[foundIdx]);
+            remaining.splice(foundIdx, 1);
+        }
+    }
+
+    return shuffled;
 }
 
 // LocalStorage utilities
