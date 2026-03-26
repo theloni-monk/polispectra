@@ -6,7 +6,10 @@
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
-    "serve": "python -m http.server 3000 --directory src"
+    "serve": "python -m http.server 3000 --directory src",
+    "setup": "bash scripts/setup-local.sh",
+    "test": "bash scripts/test.sh",
+    "test:api": "bash scripts/test-api.sh"
   },
   "keywords": ["political", "sentiment", "visualization"],
   "author": "",
