@@ -54,38 +54,59 @@ export const SCALES: Scale[] = [
     { id: 'sys_planet', name: 'Your Planet', category: 'systems' }
 ];
 
-// Generate pairwise comparison questions
-export function generateQuestions(): Array<{ id: string; scaleA: Scale; scaleB: Scale }> {
-    const allQuestions: Array<{ id: string; scaleA: Scale; scaleB: Scale }> = [];
+// Generate pairwise comparison questions with macro-first hierarchy
+export function generateQuestions(): Array<{ id: string; scaleA: Scale; scaleB: Scale; isMacro: boolean }> {
+    const macroQuestions: Array<{ id: string; scaleA: Scale; scaleB: Scale; isMacro: boolean }> = [];
+    const granularQuestions: Array<{ id: string; scaleA: Scale; scaleB: Scale; isMacro: boolean }> = [];
 
-    for (let i = 0; i < SCALES.length; i++) {
-        for (let j = i + 1; j < SCALES.length; j++) {
-            const scaleA = SCALES[i];
-            const scaleB = SCALES[j];
-            allQuestions.push({
-                id: `${scaleA.id}_vs_${scaleB.id}`,
+    // First, generate macro comparisons (categories vs categories)
+    const categories: ScaleCategory[] = ['self', 'relatives', 'others', 'systems'];
+    for (let i = 0; i < categories.length; i++) {
+        for (let j = i + 1; j < categories.length; j++) {
+            const scaleA = SCALES.find(s => s.category === categories[i])!;
+            const scaleB = SCALES.find(s => s.category === categories[j])!;
+            macroQuestions.push({
+                id: `macro_${scaleA.id}_vs_${scaleB.id}`,
                 scaleA,
-                scaleB
+                scaleB,
+                isMacro: true
             });
         }
     }
 
-    return shuffleQuestions(allQuestions);
+    // Then generate granular questions (all other pairwise comparisons)
+    for (let i = 0; i < SCALES.length; i++) {
+        for (let j = i + 1; j < SCALES.length; j++) {
+            const scaleA = SCALES[i];
+            const scaleB = SCALES[j];
+            // Skip if this is a macro comparison (comparing first of each category)
+            if (macroQuestions.some(q => q.id === `macro_${scaleA.id}_vs_${scaleB.id}`)) {
+                continue;
+            }
+            granularQuestions.push({
+                id: `${scaleA.id}_vs_${scaleB.id}`,
+                scaleA,
+                scaleB,
+                isMacro: false
+            });
+        }
+    }
+
+    // Shuffle granular questions but keep macro first
+    return [...macroQuestions, ...shuffleQuestions(granularQuestions)];
 }
 
 // Shuffle questions intelligently to avoid consecutive pairs comparing the same scales
-function shuffleQuestions(questions: Array<{ id: string; scaleA: Scale; scaleB: Scale }>): Array<{ id: string; scaleA: Scale; scaleB: Scale }> {
-    const shuffled: Array<{ id: string; scaleA: Scale; scaleB: Scale }> = [];
+function shuffleQuestions(questions: Array<{ id: string; scaleA: Scale; scaleB: Scale; isMacro: boolean }>): Array<{ id: string; scaleA: Scale; scaleB: Scale; isMacro: boolean }> {
+    const shuffled: Array<{ id: string; scaleA: Scale; scaleB: Scale; isMacro: boolean }> = [];
     const remaining = [...questions];
 
     while (remaining.length > 0) {
         if (shuffled.length === 0) {
-            // Pick a random first question
             const idx = Math.floor(Math.random() * remaining.length);
             shuffled.push(remaining[idx]);
             remaining.splice(idx, 1);
         } else {
-            // Find a question that doesn't share scales with the last question
             const lastQ = shuffled[shuffled.length - 1];
             const lastScales = new Set([lastQ.scaleA.id, lastQ.scaleB.id]);
 
@@ -99,7 +120,6 @@ function shuffleQuestions(questions: Array<{ id: string; scaleA: Scale; scaleB: 
                 }
             }
 
-            // If no non-overlapping question found, pick a random one
             if (foundIdx === -1) {
                 foundIdx = Math.floor(Math.random() * remaining.length);
             }
@@ -139,29 +159,80 @@ export async function submitPhilosophy(philosophy: Philosophy): Promise<string> 
 }
 
 export async function getPhilosophies(): Promise<Philosophy[]> {
-    // Dummy backend - return sample data
+    // Dummy backend - return sample data + canonical examples
     return new Promise((resolve) => {
         setTimeout(() => {
-            resolve([
+            const canonicalExamples: Philosophy[] = [
+                {
+                    title: 'Communitarian',
+                    timestamp: Date.now() - 100000,
+                    answers: [
+                        { scaleA: 'self_mind', scaleB: 'sys_humankind', preference: 'B' },
+                        { scaleA: 'self_body', scaleB: 'rel_parents', preference: 'B' },
+                        { scaleA: 'rel_siblings', scaleB: 'oth_nation', preference: 'B' },
+                        { scaleA: 'self_mind', scaleB: 'rel_parents', preference: 'B' },
+                        { scaleA: 'oth_metro', scaleB: 'sys_faith', preference: 'A' },
+                        { scaleA: 'self_mind', scaleB: 'sys_government', preference: 'B' },
+                    ]
+                },
+                {
+                    title: 'Individualist',
+                    timestamp: Date.now() - 50000,
+                    answers: [
+                        { scaleA: 'self_mind', scaleB: 'sys_humankind', preference: 'A' },
+                        { scaleA: 'self_body', scaleB: 'rel_parents', preference: 'A' },
+                        { scaleA: 'rel_siblings', scaleB: 'oth_nation', preference: 'A' },
+                        { scaleA: 'self_mind', scaleB: 'rel_parents', preference: 'A' },
+                        { scaleA: 'oth_metro', scaleB: 'sys_faith', preference: 'A' },
+                        { scaleA: 'self_mind', scaleB: 'sys_government', preference: 'A' },
+                    ]
+                },
+                {
+                    title: 'Traditional Values',
+                    timestamp: Date.now() - 30000,
+                    answers: [
+                        { scaleA: 'self_mind', scaleB: 'sys_faith', preference: 'B' },
+                        { scaleA: 'sys_faith', scaleB: 'oth_nation', preference: 'B' },
+                        { scaleA: 'rel_parents', scaleB: 'sys_government', preference: 'B' },
+                        { scaleA: 'rel_ancestors', scaleB: 'sys_occupation', preference: 'B' },
+                        { scaleA: 'sys_faith', scaleB: 'self_body', preference: 'B' },
+                    ]
+                },
+                {
+                    title: 'Secular Cosmopolitan',
+                    timestamp: Date.now() - 10000,
+                    answers: [
+                        { scaleA: 'sys_humankind', scaleB: 'sys_faith', preference: 'A' },
+                        { scaleA: 'oth_nation', scaleB: 'sys_humankind', preference: 'B' },
+                        { scaleA: 'sys_government', scaleB: 'sys_faith', preference: 'A' },
+                        { scaleA: 'sys_alliances', scaleB: 'oth_nation', preference: 'B' },
+                        { scaleA: 'self_mind', scaleB: 'sys_faith', preference: 'A' },
+                    ]
+                }
+            ];
+
+            const otherExamples: Philosophy[] = [
                 {
                     title: 'Collectivist',
                     timestamp: Date.now() - 10000,
                     answers: SCALES.slice(0, 10).map((scale, i) => ({
                         scaleA: scale.id,
                         scaleB: SCALES[(i + 5) % SCALES.length].id,
-                        preference: i % 2 === 0 ? 'A' : 'B'
+                        preference: (i % 2 === 0 ? 'B' : 'A') as 'A' | 'B'
                     }))
                 },
                 {
-                    title: 'Individualist',
+                    title: 'Libertarian',
                     timestamp: Date.now() - 5000,
                     answers: SCALES.slice(0, 10).map((scale, i) => ({
                         scaleA: scale.id,
                         scaleB: SCALES[(i + 5) % SCALES.length].id,
-                        preference: i % 2 === 0 ? 'B' : 'A'
+                        preference: (i % 2 === 0 ? 'A' : 'B') as 'A' | 'B'
                     }))
                 }
-            ]);
+            ];
+
+            resolve([...canonicalExamples, ...otherExamples]);
         }, 300);
     });
 }

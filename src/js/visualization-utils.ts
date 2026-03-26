@@ -1,6 +1,60 @@
-// Visualization utilities for spectrum data
+import { SCALES, Philosophy } from './utils.js';
+
+// Types
 export interface SpectrumData {
     [key: string]: { A: number; B: number };
+}
+
+// Calculate collectivism score (0 = individualist, 1 = collectivist)
+export function calculateCollectivismScore(philosophy: Philosophy): number {
+    let collectiveScore = 0;
+    let totalCount = 0;
+
+    const collectiveScales = new Set([
+        'rel_ancestors', 'rel_parents', 'rel_siblings', 'rel_spouse', 'rel_progeny',
+        'oth_neighborhood', 'oth_metro', 'oth_province', 'oth_nation',
+        'sys_faith', 'sys_government', 'sys_alliances', 'sys_humankind'
+    ]);
+
+    const individualScales = new Set([
+        'self_mind', 'self_tissue', 'self_body', 'sys_occupation'
+    ]);
+
+    philosophy.answers.forEach(answer => {
+        const aIsCollective = collectiveScales.has(answer.scaleA);
+        const bIsCollective = collectiveScales.has(answer.scaleB);
+
+        if (answer.preference === 'A') {
+            collectiveScore += aIsCollective ? 1 : (bIsCollective ? -1 : 0);
+        } else if (answer.preference === 'B') {
+            collectiveScore += bIsCollective ? 1 : (aIsCollective ? -1 : 0);
+        }
+        totalCount++;
+    });
+
+    // Normalize to 0-1 range
+    return (collectiveScore / (totalCount * 2)) + 0.5;
+}
+
+// Calculate relative importance score (0-1 based on how diverse the preferences are)
+export function calculateImportanceVariance(philosophy: Philosophy, scaleId: string): number {
+    const relevantAnswers = philosophy.answers.filter(
+        a => a.scaleA === scaleId || a.scaleB === scaleId
+    );
+
+    if (relevantAnswers.length === 0) return 0.5;
+
+    let score = 0;
+    relevantAnswers.forEach(answer => {
+        if (answer.preference === 'neutral') {
+            score += 0.5;
+        } else if ((answer.scaleA === scaleId && answer.preference === 'A') ||
+                   (answer.scaleB === scaleId && answer.preference === 'B')) {
+            score += 1;
+        }
+    });
+
+    return score / relevantAnswers.length;
 }
 
 // Build a preference matrix from spectrum data
@@ -20,9 +74,10 @@ export function buildPreferenceMatrix(
             const bIdx = scaleIds.indexOf(scaleBId);
 
             if (aIdx !== -1 && bIdx !== -1) {
-                const total = data.A + data.B;
+                const specData = data as { A: number; B: number };
+                const total = specData.A + specData.B;
                 if (total > 0) {
-                    const ratio = data.A / total;
+                    const ratio = specData.A / total;
                     matrix[aIdx][bIdx] = ratio;
                     matrix[bIdx][aIdx] = 1 - ratio;
                 }
@@ -50,15 +105,16 @@ export function calculateDominance(
         const parts = key.split('_vs_');
         if (parts.length === 2) {
             const [scaleAId, scaleBId] = parts;
-            const total = data.A + data.B;
+            const specData = data as { A: number; B: number };
+            const total = specData.A + specData.B;
 
             if (total > 0) {
                 if (scaleAId in wins) totals[scaleAId] += total;
                 if (scaleBId in wins) totals[scaleBId] += total;
 
-                if (data.A > data.B && scaleAId in wins) {
+                if (specData.A > specData.B && scaleAId in wins) {
                     wins[scaleAId]++;
-                } else if (data.B > data.A && scaleBId in wins) {
+                } else if (specData.B > specData.A && scaleBId in wins) {
                     wins[scaleBId]++;
                 }
             }
@@ -76,10 +132,10 @@ export function calculateDominance(
 // Color utilities for visualization
 export function getScaleCategoryColor(category: string): string {
     const colors: { [key: string]: string } = {
-        self: '#e74c3c',
-        relatives: '#f39c12',
-        others: '#3498db',
-        systems: '#9b59b6'
+        self: '#5b7fa6',
+        relatives: '#7d9fc1',
+        others: '#a0b9d4',
+        systems: '#6b8ba3'
     };
     return colors[category] || '#95a5a6';
 }

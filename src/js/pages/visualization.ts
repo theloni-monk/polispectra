@@ -4,7 +4,9 @@ import {
     buildPreferenceMatrix,
     initializeGraphLayout,
     simulateLayout,
-    getScaleCategoryColor
+    getScaleCategoryColor,
+    calculateCollectivismScore,
+    calculateImportanceVariance
 } from '../visualization-utils.js';
 
 export async function renderVisualizationPage(
@@ -211,6 +213,187 @@ export async function renderVisualizationPage(
     vizContainer.appendChild(philosophiesCard);
 
     page.appendChild(vizContainer);
+
+    // Second row: Add scatter plot and network graph visualizations
+    const vizContainer2 = document.createElement('div');
+    vizContainer2.className = 'viz-container';
+    vizContainer2.style.gridTemplateColumns = '1fr 1fr';
+
+    // Scatter plot: Collectivism vs Importance
+    const scatterCard = document.createElement('div');
+    scatterCard.className = 'viz-card';
+
+    const scatterTitle = document.createElement('h2');
+    scatterTitle.textContent = 'Values Landscape';
+
+    scatterCard.appendChild(scatterTitle);
+
+    const scatterSvg = document.createElement('svg');
+    scatterSvg.setAttribute('width', '100%');
+    scatterSvg.setAttribute('height', '300');
+    scatterSvg.setAttribute('viewBox', '0 0 400 300');
+    scatterSvg.style.border = '1px solid #f0f3f7';
+    scatterSvg.style.borderRadius = '8px';
+    scatterSvg.style.background = 'white';
+
+    // Draw axes
+    const axisGroup = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+
+    const xAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    xAxis.setAttribute('x1', '40');
+    xAxis.setAttribute('y1', '260');
+    xAxis.setAttribute('x2', '380');
+    xAxis.setAttribute('y2', '260');
+    xAxis.setAttribute('stroke', '#d4dce6');
+    xAxis.setAttribute('stroke-width', '2');
+
+    const yAxis = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+    yAxis.setAttribute('x1', '40');
+    yAxis.setAttribute('y1', '20');
+    yAxis.setAttribute('x2', '40');
+    yAxis.setAttribute('y2', '260');
+    yAxis.setAttribute('stroke', '#d4dce6');
+    yAxis.setAttribute('stroke-width', '2');
+
+    axisGroup.appendChild(xAxis);
+    axisGroup.appendChild(yAxis);
+
+    // Labels
+    const xLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    xLabel.setAttribute('x', '350');
+    xLabel.setAttribute('y', '285');
+    xLabel.setAttribute('font-size', '12');
+    xLabel.setAttribute('fill', '#6b7c8f');
+    xLabel.textContent = 'Collectivism →';
+
+    const yLabel = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+    yLabel.setAttribute('x', '10');
+    yLabel.setAttribute('y', '25');
+    yLabel.setAttribute('font-size', '12');
+    yLabel.setAttribute('fill', '#6b7c8f');
+    yLabel.textContent = '← Importance';
+
+    axisGroup.appendChild(xLabel);
+    axisGroup.appendChild(yLabel);
+
+    scatterSvg.appendChild(axisGroup);
+
+    // Plot philosophies as points
+    philosophies.forEach((philosophy, idx) => {
+        const collectivism = calculateCollectivismScore(philosophy);
+        const importance = calculateImportanceVariance(
+            philosophy,
+           philosophy.answers[0]?.scaleA || SCALES[0].id
+        );
+
+        const x = 40 + collectivism * 340;
+        const y = 260 - importance * 240;
+
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', String(x));
+        circle.setAttribute('cy', String(y));
+        circle.setAttribute('r', '6');
+        circle.setAttribute('fill', getScaleCategoryColor(
+            idx % 4 === 0 ? 'self' :
+            idx % 4 === 1 ? 'relatives' :
+            idx % 4 === 2 ? 'others' : 'systems'
+        ));
+        circle.setAttribute('opacity', '0.7');
+
+        const title = document.createElementNS('http://www.w3.org/2000/svg', 'title');
+        title.textContent = philosophy.title;
+        circle.appendChild(title);
+
+        scatterSvg.appendChild(circle);
+    });
+
+    scatterCard.appendChild(scatterSvg);
+    vizContainer2.appendChild(scatterCard);
+
+    // Network graph: Spring-force visualization
+    const networkCard = document.createElement('div');
+    networkCard.className = 'viz-card';
+
+    const networkTitle = document.createElement('h2');
+    networkTitle.textContent = 'Values Network';
+
+    networkCard.appendChild(networkTitle);
+
+    const canvasContainer = document.createElement('div');
+    canvasContainer.style.width = '100%';
+    canvasContainer.style.height = '300px';
+    canvasContainer.style.border = '1px solid #f0f3f7';
+    canvasContainer.style.borderRadius = '8px';
+    canvasContainer.style.background = 'white';
+    canvasContainer.style.position = 'relative';
+    canvasContainer.style.overflow = 'hidden';
+
+    // Create canvas for network visualization
+    const canvas = document.createElement('canvas');
+    canvas.width = canvasContainer.clientWidth * window.devicePixelRatio;
+    canvas.height = canvasContainer.clientHeight * window.devicePixelRatio;
+    canvas.style.width = '100%';
+    canvas.style.height = '100%';
+
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+        ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+        // Initialize layout
+        const scaleNames: { [id: string]: string } = {};
+        const categories: { [id: string]: string } = {};
+        SCALES.forEach(s => {
+            scaleNames[s.id] = s.name;
+            categories[s.id] = s.category;
+        });
+
+        const nodes = initializeGraphLayout(scaleIds, scaleNames, categories);
+        const simulated = simulateLayout(nodes, []);
+
+        // Draw edges first
+        const dominanceThreshold = 0.3;
+        SCALES.forEach((scaleA, i) => {
+            SCALES.forEach((scaleB, j) => {
+                if (i < j) {
+                    const nodeA = simulated.find(n => n.id === scaleA.id);
+                    const nodeB = simulated.find(n => n.id === scaleB.id);
+                    if (nodeA && nodeB) {
+                        const avgDominance = ((dominance[scaleA.id] || 0) + (dominance[scaleB.id] || 0)) / 2;
+                        if (avgDominance > dominanceThreshold) {
+                            ctx.strokeStyle = `rgba(91, 127, 166, ${0.1 + avgDominance * 0.4})`;
+                            ctx.lineWidth = 0.5 + avgDominance * 1.5;
+                            ctx.beginPath();
+                            ctx.moveTo(nodeA.x, nodeA.y);
+                            ctx.lineTo(nodeB.x, nodeB.y);
+                            ctx.stroke();
+                        }
+                    }
+                }
+            });
+        });
+
+        // Draw nodes
+        simulated.forEach(node => {
+            ctx.fillStyle = getScaleCategoryColor(node.category);
+            ctx.beginPath();
+            ctx.arc(node.x, node.y, 8, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw label
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = '9px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            const label = node.label.split(' ')[0];
+            ctx.fillText(label, node.x, node.y);
+        });
+    }
+
+    canvasContainer.appendChild(canvas);
+    networkCard.appendChild(canvasContainer);
+    vizContainer2.appendChild(networkCard);
+
+    page.appendChild(vizContainer2)
 
     // Controls
     const controls = document.createElement('div');

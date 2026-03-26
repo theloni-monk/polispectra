@@ -17,8 +17,9 @@ export function renderSpectralPage(
     page.className = 'spectral-page fade-in';
 
     const allQuestions = generateQuestions();
-    // Start with a smaller hierarchical set (first ~20 questions instead of all pairs)
-    const visibleQuestions = allQuestions.slice(0, Math.min(20, allQuestions.length));
+    // Split macro and granular questions
+    const macroQuestions = allQuestions.filter(q => q.isMacro);
+    const visibleQuestions = macroQuestions.length > 0 ? macroQuestions : allQuestions.slice(0, Math.min(20, allQuestions.length));
     const draft = loadDraft() || { initialAnswer: 'yes', answers: {}, philosophyTitle: '' };
 
     let currentQuestionIndex = 0;
@@ -56,7 +57,8 @@ export function renderSpectralPage(
             if (idx === currentQuestionIndex) link.classList.add('active');
             if (draft.answers[q.id]) link.classList.add('answered');
 
-            link.textContent = `${q.scaleA.name.split(' ')[0]} vs ${q.scaleB.name.split(' ')[0]}`;
+            const label = q.isMacro ? `${q.scaleA.category} vs ${q.scaleB.category}` : `${q.scaleA.name.split(' ')[0]} vs ${q.scaleB.name.split(' ')[0]}`;
+            link.textContent = label;
             link.title = `${q.scaleA.name} vs ${q.scaleB.name}`;
             link.addEventListener('click', () => {
                 currentQuestionIndex = idx;
@@ -71,7 +73,7 @@ export function renderSpectralPage(
             moreBtn.className = 'show-more-btn';
             moreBtn.style.width = '100%';
             moreBtn.style.marginTop = '1rem';
-            moreBtn.textContent = `Show ${allQuestions.length - visibleQuestions.length} more questions`;
+            moreBtn.textContent = `${allQuestions.length - visibleQuestions.length} more detailed questions`;
             moreBtn.addEventListener('click', () => {
                 showingMore = true;
                 updateQuestionLinks();
