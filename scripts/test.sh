@@ -35,7 +35,7 @@ run_test() {
 # 1. Build Tests
 echo -e "${BLUE}Build Tests${NC}"
 echo "---"
-run_test "TypeScript compilation" "npm run build"
+run_test "TypeScript compilation" "pnpm run build"
 run_test "JavaScript output exists" "[ -f src/js/app.js ]"
 run_test "All pages compiled" "[ -f src/js/pages/landing.js ] && [ -f src/js/pages/spectral.js ] && [ -f src/js/pages/visualization.js ]"
 run_test "Utilities compiled" "[ -f src/js/utils.js ] && [ -f src/js/visualization-utils.js ]"
@@ -53,7 +53,7 @@ run_test "Vercel config exists" "[ -f vercel.json ]"
 echo -e "\n${BLUE}Dependencies Tests${NC}"
 echo "---"
 run_test "node_modules installed" "[ -d node_modules ]"
-run_test "TypeScript available" "command -v npx && npx tsc --version"
+run_test "pnpm available" "command -v pnpm"
 run_test "@upstash/redis installed" "[ -d node_modules/@upstash/redis ]"
 run_test "@vercel/node installed" "[ -d node_modules/@vercel/node ]"
 

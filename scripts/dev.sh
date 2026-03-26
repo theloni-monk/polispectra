@@ -29,7 +29,7 @@ trap cleanup EXIT INT TERM
 
 # Start TypeScript watcher in background
 echo -e "${BLUE}Starting TypeScript watcher...${NC}"
-npm run dev &
+pnpm run dev &
 DEV_PID=$!
 echo -e "${GREEN}✓ TypeScript watcher running (PID: $DEV_PID)${NC}"
 
@@ -38,7 +38,7 @@ sleep 2
 
 # Start the dev server
 echo -e "${BLUE}Starting local server on port 3000...${NC}"
-npm run serve &
+pnpm run serve &
 SERVER_PID=$!
 echo -e "${GREEN}✓ Server running at http://localhost:3000${NC}"
 

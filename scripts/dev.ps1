@@ -29,7 +29,7 @@ Register-EngineEvent -SourceIdentifier PowerShell.Exiting -Action $trap
 Write-Host "Starting TypeScript watcher..." -ForegroundColor Blue
 $devJob = Start-Job -ScriptBlock {
     Set-Location $using:PWD
-    & npm run dev
+    & pnpm run dev
 } -Name "TypeScript-Watcher"
 
 Start-Sleep -Seconds 1
@@ -42,7 +42,7 @@ Start-Sleep -Seconds 2
 Write-Host "Starting local server on port 3000..." -ForegroundColor Blue
 $serverJob = Start-Job -ScriptBlock {
     Set-Location $using:PWD
-    & npm run serve
+    & pnpm run serve
 } -Name "Dev-Server"
 
 Start-Sleep -Seconds 1

@@ -156,17 +156,17 @@ scripts\setup-local.bat
 
 ---
 
-## Using npm Scripts
+## Using pnpm Scripts
 
-As an alternative, run from project root:
+As an alternative, run from project root using pnpm:
 
 ```bash
-npm run setup      # = bash scripts/setup-local.sh (or .\scripts\setup-local.ps1 on Windows)
-npm run build      # = tsc (compile TypeScript)
-npm run dev        # = tsc --watch (watch mode)
-npm run serve      # = python -m http.server (dev server)
-npm test           # = bash scripts/test.sh (or .\scripts\test.ps1 on Windows)
-npm run test:api   # = bash scripts/test-api.sh (or .\scripts\test-api.ps1 on Windows)
+pnpm run setup      # = bash scripts/setup-local.sh (or .\scripts\setup-local.ps1 on Windows)
+pnpm run build      # = tsc (compile TypeScript)
+pnpm run dev        # = tsc --watch (watch mode)
+pnpm run serve      # = pnpx serve -l 3000 (dev server on port 3000)
+pnpm test           # = bash scripts/test.sh (or .\scripts\test.ps1 on Windows)
+pnpm run test:api   # = bash scripts/test-api.sh (or .\scripts\test-api.ps1 on Windows)
 ```
 
 ---
@@ -216,8 +216,8 @@ bash scripts/dev.sh
 ### Before Committing
 ```bash
 # Works on both bash and PowerShell
-npm run build      # Check for compilation errors
-npm test           # Run full test suite
+pnpm run build      # Check for compilation errors
+pnpm test           # Run full test suite
 ```
 
 ---
@@ -271,7 +271,7 @@ Install from https://nodejs.org/ (LTS recommended)
 ```bash
 # Verify installation
 node --version  # Should show v18+
-npm --version   # Should show v9+
+pnpm --version  # Should show v8+
 ```
 
 ---
@@ -307,11 +307,11 @@ Clear and rebuild:
 ```bash
 # Bash
 rm -rf src/js/*.js src/js/**/*.js
-npm run build
+pnpm run build
 
 # PowerShell
 Remove-Item -Recurse src/js/*.js
-npm run build
+pnpm run build
 ```
 
 ---

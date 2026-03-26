@@ -37,7 +37,7 @@ function Invoke-Test {
 Write-Host ""
 Write-Host "Build Tests" -ForegroundColor Blue
 Write-Host "---"
-Invoke-Test "TypeScript compilation" { npm run build }
+Invoke-Test "TypeScript compilation" { pnpm run build }
 Invoke-Test "JavaScript output exists" { Test-Path "src/js/app.js" }
 Invoke-Test "All pages compiled" {
     (Test-Path "src/js/pages/landing.js") -and
@@ -76,7 +76,7 @@ Write-Host ""
 Write-Host "Dependencies Tests" -ForegroundColor Blue
 Write-Host "---"
 Invoke-Test "node_modules installed" { Test-Path "node_modules" }
-Invoke-Test "TypeScript available" { $null -ne (Get-Command npx -ErrorAction SilentlyContinue) }
+Invoke-Test "pnpm available" { $null -ne (Get-Command pnpm -ErrorAction SilentlyContinue) }
 Invoke-Test "@upstash/redis installed" { Test-Path "node_modules/@upstash/redis" }
 Invoke-Test "@vercel/node installed" { Test-Path "node_modules/@vercel/node" }
 

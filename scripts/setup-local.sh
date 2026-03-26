@@ -22,22 +22,23 @@ if ! command -v node &> /dev/null; then
     exit 1
 fi
 
-if ! command -v npm &> /dev/null; then
-    echo "❌ npm not found. Please install npm"
+if ! command -v pnpm &> /dev/null; then
+    echo "❌ pnpm not found. Please install pnpm:"
+    echo "   npm install -g pnpm"
     exit 1
 fi
 
 echo -e "${GREEN}✓ Node.js $(node --version)${NC}"
-echo -e "${GREEN}✓ npm $(npm --version)${NC}"
+echo -e "${GREEN}✓ pnpm $(pnpm --version)${NC}"
 
 # 2. Install dependencies
-echo -e "\n${BLUE}Installing dependencies...${NC}"
-npm install
+echo -e "\n${BLUE}Installing dependencies with pnpm...${NC}"
+pnpm install
 echo -e "${GREEN}✓ Dependencies installed${NC}"
 
 # 3. Build TypeScript
 echo -e "\n${BLUE}Building TypeScript...${NC}"
-npm run build
+pnpm run build
 echo -e "${GREEN}✓ TypeScript compiled${NC}"
 
 # 4. Set up environment variables
@@ -69,10 +70,10 @@ echo -e "\n${YELLOW}Setup Complete!${NC}"
 echo "=========================================="
 echo ""
 echo -e "${BLUE}To start the development server:${NC}"
-echo "  npm run serve"
+echo "  pnpm run serve"
 echo ""
 echo -e "${BLUE}In another terminal, to watch TypeScript changes:${NC}"
-echo "  npm run dev"
+echo "  pnpm run dev"
 echo ""
 echo -e "${BLUE}The app will be available at:${NC}"
 echo "  http://localhost:3000"

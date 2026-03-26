@@ -15,33 +15,34 @@ Write-Host "========================================" -ForegroundColor Cyan
 Write-Host "Checking prerequisites..." -ForegroundColor Blue
 
 $hasNode = $null -ne (Get-Command node -ErrorAction SilentlyContinue)
-$hasNpm = $null -ne (Get-Command npm -ErrorAction SilentlyContinue)
+$hasPnpm = $null -ne (Get-Command pnpm -ErrorAction SilentlyContinue)
 
 if (-not $hasNode) {
     Write-Host "❌ Node.js not found. Please install Node.js 18+ from https://nodejs.org/" -ForegroundColor Red
     exit 1
 }
 
-if (-not $hasNpm) {
-    Write-Host "❌ npm not found. Please install npm" -ForegroundColor Red
+if (-not $hasPnpm) {
+    Write-Host "❌ pnpm not found. Please install pnpm:" -ForegroundColor Red
+    Write-Host "   npm install -g pnpm" -ForegroundColor White
     exit 1
 }
 
 $nodeVersion = & node --version
-$npmVersion = & npm --version
+$pnpmVersion = & pnpm --version
 
 Write-Host "✓ Node.js $nodeVersion" -ForegroundColor Green
-Write-Host "✓ npm $npmVersion" -ForegroundColor Green
+Write-Host "✓ pnpm $pnpmVersion" -ForegroundColor Green
 
 # Install dependencies
 Write-Host ""
-Write-Host "Installing dependencies..." -ForegroundColor Blue
+Write-Host "Installing dependencies with pnpm..." -ForegroundColor Blue
 
 try {
-    & npm install
+    & pnpm install
     Write-Host "✓ Dependencies installed" -ForegroundColor Green
 } catch {
-    Write-Host "❌ npm install failed: $_" -ForegroundColor Red
+    Write-Host "❌ pnpm install failed: $_" -ForegroundColor Red
     exit 1
 }
 
@@ -50,7 +51,7 @@ Write-Host ""
 Write-Host "Building TypeScript..." -ForegroundColor Blue
 
 try {
-    & npm run build
+    & pnpm run build
     Write-Host "✓ TypeScript compiled" -ForegroundColor Green
 } catch {
     Write-Host "❌ Build failed: $_" -ForegroundColor Red
@@ -92,7 +93,7 @@ Write-Host "To start the development server:" -ForegroundColor Blue
 Write-Host "  .\scripts\dev.ps1" -ForegroundColor White
 Write-Host ""
 Write-Host "In another PowerShell terminal, to watch TypeScript changes:" -ForegroundColor Blue
-Write-Host "  npm run dev" -ForegroundColor White
+Write-Host "  pnpm run dev" -ForegroundColor White
 Write-Host ""
 Write-Host "The app will be available at:" -ForegroundColor Blue
 Write-Host "  http://localhost:3000" -ForegroundColor White
