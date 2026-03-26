@@ -10,7 +10,7 @@ Quick reference for running scripts on different platforms.
 | Installs dependencies | ✅ | ✅ | ✅ |
 | Compiles TypeScript | ✅ | ✅ | ✅ |
 | Creates `.env.local` | ✅ | ✅ | ✅ |
-| Checks Node.js/npm | ✅ | ✅ | ✅ |
+| Checks Node.js/pnpm | ✅ | ✅ | ✅ |
 
 ## Development
 
@@ -48,9 +48,9 @@ Quick reference for running scripts on different platforms.
 | Requirement | Status |
 |-------------|--------|
 | Node.js 18+ | Required |
-| npm 9+ | Required |
-| TypeScript | Installed with `npm install` |
-| Python 3 | Only needed for `npm run serve` |
+| pnpm 9+ | Required |
+| TypeScript | Installed with `pnpm install` |
+| pnpm | Installed globally or with `npm install -g pnpm` |
 | Git | Optional (for version control) |
 
 ## Platform Requirements
@@ -63,7 +63,7 @@ Quick reference for running scripts on different platforms.
 - ✅ PowerShell 5+
 - ✅ Use `.\scripts\*.ps1`
 - ⚠️ May need execution policy change (see troubleshooting)
-- ✅ Python 3 needed for `npm run serve`
+- ✅ pnpm installed (run `npm install -g pnpm` if needed)
 - ✅ Fallback to `scripts\setup-local.bat` if needed
 
 ## Quick Command Reference
@@ -74,14 +74,14 @@ Quick reference for running scripts on different platforms.
 ```bash
 bash scripts/setup-local.sh    # First time only
 bash scripts/dev.sh             # Terminal 1
-npm test                        # Terminal 2, before commits
+pnpm test                        # Terminal 2, before commits
 ```
 
 **Windows (PowerShell)**:
 ```powershell
 .\scripts\setup-local.ps1       # First time only
 .\scripts\dev.ps1               # Terminal 1
-npm test                        # Terminal 2, before commits
+pnpm test                        # Terminal 2, before commits
 ```
 
 ---
@@ -90,8 +90,8 @@ npm test                        # Terminal 2, before commits
 
 **Both platforms**:
 ```bash
-npm run build                   # Check for TypeScript errors
-npm test                        # Run full test suite (pass all checks)
+pnpm run build                   # Check for TypeScript errors
+pnpm test                        # Run full test suite (pass all checks)
 ```
 
 ---
@@ -132,13 +132,22 @@ netstat -ano | Select-String ":3000"
 Stop-Process -Id <PID> -Force
 ```
 
-#### Issue: Python not found
-- Download from https://www.python.org/
-- Add Python to PATH during installation
+#### Issue: pnpm not installed
+
+Install globally first:
+
+```powershell
+npm install -g pnpm
+```
+
+Or check version:
+```powershell
+pnpm --version
+```
 
 ### Windows (Command Prompt / Legacy)
 - Use `scripts\setup-local.bat` instead of PowerShell
-- Run `npm` commands directly for dev/test
+- Run `pnpm` commands directly for dev/test
 
 ---
 
@@ -160,15 +169,15 @@ bash scripts/test.sh
 .\scripts\test.ps1
 ```
 
-### Using npm Scripts (Platform-Agnostic)
+### Using pnpm Scripts (Platform-Agnostic)
 
 Works on **all platforms** (recommended):
 ```bash
-npm run setup        # Setup
-npm run dev          # Watch TypeScript
-npm run serve        # Start dev server
-npm test             # Run tests
-npm run test:api     # Test API
+pnpm run setup        # Setup
+pnpm run dev          # Watch TypeScript
+pnpm run serve        # Start dev server
+pnpm test             # Run tests
+pnpm run test:api     # Test API
 ```
 
 ---
@@ -238,11 +247,11 @@ scripts/
 
 ## Support Matrix
 
-| Platform | Bash Scripts | PowerShell Scripts | npm Scripts |
+| Platform | Bash Scripts | PowerShell Scripts | pnpm Scripts |
 |----------|-------------|--------------------|------------|
 | macOS | ✅ Full | ⚠️ May work | ✅ Full |
 | Linux | ✅ Full | ⚠️ May work | ✅ Full |
 | Windows 10/11 | ⚠️ Requires WSL | ✅ Full | ✅ Full |
 | Windows (Legacy) | ❌ No | ❌ No | ✅ Limited |
 
-**Recommendation**: Use **npm scripts** for maximum compatibility across all platforms.
+**Recommendation**: Use **pnpm scripts** for maximum compatibility across all platforms.

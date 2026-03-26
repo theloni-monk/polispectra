@@ -10,7 +10,7 @@ bash scripts/setup-local.sh
 ```
 
 This script:
-- ✓ Checks Node.js and npm installation
+- ✓ Checks pnpm installation (install with: npm install -g pnpm)
 - ✓ Installs dependencies
 - ✓ Compiles TypeScript to JavaScript
 - ✓ Creates `.env.local` configuration file
@@ -22,7 +22,7 @@ bash scripts/dev.sh
 
 This runs:
 - TypeScript watcher (auto-compiles on file save)
-- Local HTTP server on `http://localhost:3000`
+- pnpx serve on port 3000
 
 Then open your browser and test:
 - **Landing page**: http://localhost:3000
@@ -49,9 +49,9 @@ Comprehensive checks:
 **Purpose**: One-time project initialization
 
 **Steps**:
-1. Checks for Node.js and npm
-2. Runs `npm install`
-3. Runs `npm run build`
+1. Checks for Node.js and pnpm
+2. Runs `pnpm install`
+3. Runs `pnpm run build`
 4. Creates `.env.local` with template configuration
 
 **When to use**: First time setup, or after major dependency changes
@@ -62,8 +62,8 @@ Comprehensive checks:
 **Purpose**: Run the development environment
 
 **Starts**:
-- TypeScript file watcher (`npm run dev`)
-- Local HTTP server on port 3000 (`npm run serve`)
+- TypeScript file watcher (`pnpm run dev`)
+- Local HTTP server on port 3000 (`pnpm run serve`)
 
 **Workflow**:
 1. Run this script
@@ -195,18 +195,18 @@ VITE_API_URL=http://localhost:3001
 
 ## Troubleshooting
 
-### "npm: command not found"
+### "pnpm: command not found"
 ```bash
 # Install Node.js from https://nodejs.org/ (LTS recommended)
 node --version  # Should show v18+
-npm --version   # Should show v9+
+pnpm --version   # Should show v9+
 ```
 
 ### TypeScript compilation fails
 ```bash
 # Clear cache and rebuild
 rm -rf src/js/*.js src/js/**/*.js
-npm run build
+pnpm run build
 ```
 
 ### Port 3000 already in use
@@ -240,7 +240,7 @@ Terminal 3: bash scripts/test.sh (run periodically)
 
 **Before committing**:
 ```bash
-npm run build           # Check for compilation errors
+pnpm run build           # Check for compilation errors
 bash scripts/test.sh    # Verify all checks pass
 git status              # Review changes
 git commit              # Create commit
