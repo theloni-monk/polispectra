@@ -1,0 +1,71 @@
+{
+  "philosophies": [
+    {
+      "id": "communitarian",
+      "title": "Communitarian",
+      "description": "Prioritizes collective scales, family and social bonds",
+      "timestamp": 1711468800000,
+      "answers": [
+        { "scaleA": "self_mind", "scaleB": "sys_humankind", "preference": "B", "relationship": "preference" },
+        { "scaleA": "self_body", "scaleB": "rel_parents", "preference": "B", "relationship": "preference" },
+        { "scaleA": "rel_siblings", "scaleB": "oth_nation", "preference": "B", "relationship": "preference" },
+        { "scaleA": "self_mind", "scaleB": "rel_parents", "preference": "B", "relationship": "preference" },
+        { "scaleA": "oth_metro", "scaleB": "sys_faith", "preference": "A", "relationship": "preference" },
+        { "scaleA": "self_mind", "scaleB": "sys_government", "preference": "B", "relationship": "preference" }
+      ]
+    },
+    {
+      "id": "individualist",
+      "title": "Individualist",
+      "description": "Emphasizes personal autonomy and self-importance",
+      "timestamp": 1711455400000,
+      "answers": [
+        { "scaleA": "self_mind", "scaleB": "sys_humankind", "preference": "A", "relationship": "preference" },
+        { "scaleA": "self_body", "scaleB": "rel_parents", "preference": "A", "relationship": "preference" },
+        { "scaleA": "rel_siblings", "scaleB": "oth_nation", "preference": "A", "relationship": "preference" },
+        { "scaleA": "self_mind", "scaleB": "rel_parents", "preference": "A", "relationship": "preference" },
+        { "scaleA": "oth_metro", "scaleB": "sys_faith", "preference": "A", "relationship": "preference" },
+        { "scaleA": "self_mind", "scaleB": "sys_government", "preference": "A", "relationship": "preference" }
+      ]
+    },
+    {
+      "id": "traditional",
+      "title": "Traditional Values",
+      "description": "Emphasis on faith, family, ancestral importance",
+      "timestamp": 1711441800000,
+      "answers": [
+        { "scaleA": "self_mind", "scaleB": "sys_faith", "preference": "B", "relationship": "preference" },
+        { "scaleA": "sys_faith", "scaleB": "oth_nation", "preference": "B", "relationship": "preference" },
+        { "scaleA": "rel_parents", "scaleB": "sys_government", "preference": "B", "relationship": "preference" },
+        { "scaleA": "rel_ancestors", "scaleB": "sys_occupation", "preference": "B", "relationship": "preference" },
+        { "scaleA": "sys_faith", "scaleB": "self_body", "preference": "B", "relationship": "preference" }
+      ]
+    },
+    {
+      "id": "cosmopolitan",
+      "title": "Secular Cosmopolitan",
+      "description": "Global humanity over national/religious boundaries",
+      "timestamp": 1711425600000,
+      "answers": [
+        { "scaleA": "sys_humankind", "scaleB": "sys_faith", "preference": "A", "relationship": "preference" },
+        { "scaleA": "oth_nation", "scaleB": "sys_humankind", "preference": "B", "relationship": "preference" },
+        { "scaleA": "sys_government", "scaleB": "sys_faith", "preference": "A", "relationship": "preference" },
+        { "scaleA": "sys_alliances", "scaleB": "oth_nation", "preference": "B", "relationship": "preference" },
+        { "scaleA": "self_mind", "scaleB": "sys_faith", "preference": "A", "relationship": "preference" }
+      ]
+    },
+    {
+      "id": "libertarian",
+      "title": "Libertarian",
+      "description": "Personal freedom above collective structures",
+      "timestamp": 1711409400000,
+      "answers": [
+        { "scaleA": "self_mind", "scaleB": "sys_government", "preference": "A", "relationship": "preference" },
+        { "scaleA": "self_body", "scaleB": "oth_nation", "preference": "A", "relationship": "preference" },
+        { "scaleA": "sys_occupation", "scaleB": "sys_faith", "preference": "A", "relationship": "preference" },
+        { "scaleA": "self_mind", "scaleB": "rel_parents", "preference": "A", "relationship": "preference" },
+        { "scaleA": "sys_occupation", "scaleB": "sys_government", "preference": "A", "relationship": "preference" }
+      ]
+    }
+  ]
+}

@@ -4,7 +4,7 @@
   "description": "A visualization tool for political sentiment",
   "type": "module",
   "scripts": {
-    "build": "tsc",
+    "build": "tsc && cp -r public/* src/ 2>/dev/null || powershell -Command \"Copy-Item -Path public/* -Destination src/ -Recurse -Force\"",
     "dev": "tsc --watch",
     "serve": "pnpx serve -l 3000 src",
     "setup": "bash scripts/setup-local.sh",
